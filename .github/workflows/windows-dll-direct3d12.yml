@@ -20,7 +20,7 @@ jobs:
     - name: Get Node.js
       run: git clone https://github.com/Kode/nodejs_bin.git --depth 1
     - name: Compile
-      run: .\nodejs_bin\node.exe make.js -g direct3d12 --kinc . --dynlib --compile
+      run: .\nodejs_bin\node.exe make.js -g direct3d11 --kinc . --dynlib --compile --noshaders
     - name: Test
       run: cd \build
     - name: Test2
