@@ -29,6 +29,8 @@ jobs:
       run: nodejs_bin/node make.js -g vulkan --kinc . --from Tests/DLL --noshaders --dynlib --compile
     - name: Get Kinc_bin
       run: git clone https://github.com/foundry2D/Kinc_bin
+    - name: Remove old binary
+      run: rm Kinc_bin\Kinc_vulkan.so
     - name: Copy binary
       run:  cp build/Release/Kinc.so Kinc_bin\Kinc_vulkan.so
     - name: Set name
