@@ -30,7 +30,7 @@ jobs:
     - name: Set email
       run: git config --global user.email "foundry2dbot@gmail.com"
     - name: Commit binary
-      run: git -C Kinc_bin commit -a -m "Update Windows binary to ${env:GITHUB_SHA}."
+      run: git -C Kinc_bin commit -a -m "Update Windows D3D12 binary to ${env:GITHUB_SHA}."
     - name: Tag binary
       run: git -C Kinc_bin tag windows_${env:GITHUB_SHA}
     - name: Push binary
