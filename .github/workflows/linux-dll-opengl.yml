@@ -26,7 +26,7 @@ jobs:
     - name: Setup Node.js
       run: nodejs_bin/copysysbin.sh
     - name: Compile
-      run: nodejs_bin/node make.js -g opengl --kinc . --from Tests/DLL --noshaders --dynlib --compile
+      run: nodejs_bin/node make.js -g opengl --kinc . --noshaders --dynlib --compile
     - name: Get Kinc_bin
       run: git clone https://github.com/foundry2D/Kinc_bin
     - name: Copy binary
