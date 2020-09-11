@@ -38,7 +38,7 @@ jobs:
     - name: Commit binary
       run: git -C Kinc_bin commit -a -m "Update Linux Vulkan binary to ${env:GITHUB_SHA}."
     - name: Tag binary
-      run: git -C Kinc_bin tag windows_${env:GITHUB_SHA}
+      run: git -C Kinc_bin tag linux_vulkan_${env:GITHUB_SHA}
     - name: Push binary
       run: git -C Kinc_bin push https://foundbot:${env:FOUNDBOT_PASS}@github.com/foundry2D/Kinc_bin.git master --tags
       env:
