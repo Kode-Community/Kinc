@@ -1,4 +1,4 @@
-let project = new Project('Kinclib');
+let project = new Project('Kinc');
 
 project.setDebugDir('Deployment');
 
