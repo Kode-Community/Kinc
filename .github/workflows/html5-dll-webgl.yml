@@ -28,7 +28,7 @@ jobs:
     - name: Get Kinc_bin
       run: git clone https://github.com/Kode-Community/Kinc_bin
     - name: ls
-      run:  ls ./Tests/html5/Deployment
+      run:  ls ./Tests/html5
     - name: Copy wasm binary
       run:  cp ./Tests/html5/Deployment/Kinc.wasm Kinc_bin/Kinc_webgl.wasm
     - name: Copy js binary
