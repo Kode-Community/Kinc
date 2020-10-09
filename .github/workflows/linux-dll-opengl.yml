@@ -41,6 +41,8 @@ jobs:
       run: git -C Kinc_bin commit -a -m "Update Linux Opengl binary to $GITHUB_SHA."
     - name: Tag binary
       run: git -C Kinc_bin tag linux_opengl_$GITHUB_SHA
+    - name: Pull before push
+      run: git -C Kinc_bin pull
     - name: Push binary
       run: git -C Kinc_bin push https://foundbot:$FOUNDBOT_PASS@github.com/Kode-Community/Kinc_bin.git master --tags
       env:
