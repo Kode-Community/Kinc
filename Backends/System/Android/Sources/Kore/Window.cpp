@@ -3,7 +3,6 @@
 #include <kinc/display.h>
 #include <kinc/graphics4/graphics.h>
 #include <kinc/window.h>
-#include <kinc/bridge.h>
 
 /*namespace {
 	Window window;
@@ -15,6 +14,11 @@ Window* Window::get(int window) {
 	}
 	return &::window;
 }*/
+
+namespace {
+	void (*resizeCallback)(int x, int y, void* data);
+	void* resizeCallbackData;
+}
 
 int kinc_count_windows(void) {
 	return 1;
@@ -48,8 +52,10 @@ void kinc_window_move(int window_index, int x, int y) {
 	
 }
 
+extern "C" void kinc_internal_change_framebuffer(int window, struct kinc_framebuffer_options *frame);
+
 void kinc_window_change_framebuffer(int window_index, kinc_framebuffer_options_t *frame) {
-	kinc_bridge_g4_internal_change_framebuffer(0, frame);
+    kinc_internal_change_framebuffer(0, frame);
 }
 
 void kinc_window_change_features(int window_index, int features) {
@@ -81,7 +87,14 @@ int kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_options_t *f
 }
 
 void kinc_window_set_resize_callback(int window_index, void (*callback)(int x, int y, void *data), void *data) {
+	resizeCallback = callback;
+	resizeCallbackData = data;
+}
 
+void kinc_internal_call_resize_callback(int window_index, int width, int height) {
+	if (resizeCallback != NULL) {
+		resizeCallback(width, height, resizeCallbackData);
+	}
 }
 
 void kinc_window_set_ppi_changed_callback(int window_index, void (*callback)(int ppi, void *data), void *data) {

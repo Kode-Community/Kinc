@@ -2,6 +2,7 @@
 
 #include <kinc/graphics5/pipeline.h>
 #include <kinc/graphics5/shader.h>
+#include <kinc/log.h>
 
 #import <Metal/Metal.h>
 
@@ -127,14 +128,8 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 			| (pipeline->colorWriteMaskBlue[i] ? MTLColorWriteMaskBlue : 0)
 			| (pipeline->colorWriteMaskAlpha[i] ? MTLColorWriteMaskAlpha : 0);
 	}
-	if (pipeline->depthAttachmentBits > 0) {
-		renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-		renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-	}
-	else {
-		renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
-		renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormatInvalid;
-	}
+	renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatInvalid;
+	renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormatInvalid;
 
 	float offset = 0;
 	MTLVertexDescriptor* vertexDescriptor = [[MTLVertexDescriptor alloc] init];
@@ -143,35 +138,49 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 		int index = findAttributeIndex(renderPipelineDesc.vertexFunction.vertexAttributes, pipeline->inputLayout[0]->elements[i].name);
 
 		if (index < 0) {
-			fprintf(stderr, "could not find vertex attribute %s\n", pipeline->inputLayout[0]->elements[i].name);
+			kinc_log(KINC_LOG_LEVEL_WARNING, "Could not find vertex attribute %s\n", pipeline->inputLayout[0]->elements[i].name);
 		}
 
-		vertexDescriptor.attributes[index].bufferIndex = 0;
-		vertexDescriptor.attributes[index].offset = offset;
-
+		if (index >= 0) {
+			vertexDescriptor.attributes[index].bufferIndex = 0;
+			vertexDescriptor.attributes[index].offset = offset;
+		}
+		
 		switch (pipeline->inputLayout[0]->elements[i].data) {
 		case KINC_G4_VERTEX_DATA_FLOAT1:
-			vertexDescriptor.attributes[index].format = MTLVertexFormatFloat;
+			if (index >= 0) {
+				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat;
+			}
 			offset += sizeof(float);
 			break;
 		case KINC_G4_VERTEX_DATA_FLOAT2:
-			vertexDescriptor.attributes[index].format = MTLVertexFormatFloat2;
+			if (index >= 0) {
+				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat2;
+			}
 			offset += 2 * sizeof(float);
 			break;
 		case KINC_G4_VERTEX_DATA_FLOAT3:
-			vertexDescriptor.attributes[index].format = MTLVertexFormatFloat3;
+			if (index >= 0) {
+				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat3;
+			}
 			offset += 3 * sizeof(float);
 			break;
 		case KINC_G4_VERTEX_DATA_FLOAT4:
-			vertexDescriptor.attributes[index].format = MTLVertexFormatFloat4;
+			if (index >= 0) {
+				vertexDescriptor.attributes[index].format = MTLVertexFormatFloat4;
+			}
 			offset += 4 * sizeof(float);
 			break;
 		case KINC_G4_VERTEX_DATA_SHORT2_NORM:
-			vertexDescriptor.attributes[index].format = MTLVertexFormatShort2Normalized;
+			if (index >= 0) {
+				vertexDescriptor.attributes[index].format = MTLVertexFormatShort2Normalized;
+			}
 			offset += 2 * sizeof(short);
 			break;
 		case KINC_G4_VERTEX_DATA_SHORT4_NORM:
-			vertexDescriptor.attributes[index].format = MTLVertexFormatShort4Normalized;
+			if (index >= 0) {
+				vertexDescriptor.attributes[index].format = MTLVertexFormatShort4Normalized;
+			}
 			offset += 4 * sizeof(short);
 			break;
 		default:
@@ -187,21 +196,41 @@ void kinc_g5_pipeline_compile(kinc_g5_pipeline_t *pipeline) {
 	NSError* errors = nil;
 	MTLRenderPipelineReflection* reflection = nil;
 	id<MTLDevice> device = getMetalDevice();
+	
 	pipeline->impl._pipeline = [device newRenderPipelineStateWithDescriptor:renderPipelineDesc options:MTLPipelineOptionBufferTypeInfo reflection:&reflection error:&errors];
 	if (errors != nil) NSLog(@"%@", [errors localizedDescription]);
 	assert(pipeline->impl._pipeline && !errors);
+	
+	renderPipelineDesc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+	renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+	pipeline->impl._pipelineDepth = [device newRenderPipelineStateWithDescriptor:renderPipelineDesc options:MTLPipelineOptionBufferTypeInfo reflection:&reflection error:&errors];
+	if (errors != nil) NSLog(@"%@", [errors localizedDescription]);
+	assert(pipeline->impl._pipelineDepth && !errors);
+	
 	pipeline->impl._reflection = reflection;
 
 	MTLDepthStencilDescriptor* depthStencilDescriptor = [MTLDepthStencilDescriptor new];
 	depthStencilDescriptor.depthCompareFunction = convert(pipeline->depthMode);
 	depthStencilDescriptor.depthWriteEnabled = pipeline->depthWrite;
 	pipeline->impl._depthStencil = [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+	
+	depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways;
+	depthStencilDescriptor.depthWriteEnabled = false;
+	pipeline->impl._depthStencilNone = [device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
+
+extern "C" bool kinc_internal_current_render_target_has_depth();
 
 void kinc_g5_internal_pipeline_set(kinc_g5_pipeline_t *pipeline) {
 	id<MTLRenderCommandEncoder> encoder = getMetalEncoder();
-	[encoder setRenderPipelineState:pipeline->impl._pipeline];
-	[encoder setDepthStencilState:pipeline->impl._depthStencil];
+	if (kinc_internal_current_render_target_has_depth()) {
+		[encoder setRenderPipelineState:pipeline->impl._pipelineDepth];
+		[encoder setDepthStencilState:pipeline->impl._depthStencil];
+	}
+	else {
+		[encoder setRenderPipelineState:pipeline->impl._pipeline];
+		[encoder setDepthStencilState:pipeline->impl._depthStencilNone];
+	}
 	[encoder setFrontFacingWinding:MTLWindingClockwise];
 	[encoder setCullMode:convert(pipeline->cullMode)];
 }

@@ -29,6 +29,11 @@ let a3 = false;
 const lz4x = true;
 
 project.addFile('Sources/**');
+
+if (!cpp) {
+	project.addExclude('Sources/Kore/**');
+}
+
 if (lz4x) {
 	project.addDefine('KORE_LZ4X');
 	project.addExclude('Sources/kinc/io/lz4/**');
@@ -396,6 +401,7 @@ if (g4) {
 }
 else {
 	project.addExclude('Sources/Kore/Graphics4/**');
+	project.addExclude('Sources/kinc/graphics4/**');
 }
 
 if (g5) {
@@ -410,9 +416,11 @@ else {
 }
 
 if (!a3) {
-	a3 = true;
-	project.addDefine('KORE_A3');
-	addBackend('Audio3/A3onA2');
+	if (cpp) {
+		a3 = true;
+		project.addDefine('KORE_A3');
+		addBackend('Audio3/A3onA2');
+	}
 }
 
 project.setDebugDir('Deployment');
