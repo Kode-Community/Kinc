@@ -26,7 +26,7 @@ jobs:
     - name: Compile (emscripten)
       run: git clone https://github.com/emscripten-core/emsdk.git && cd emsdk && ./emsdk install latest && ./emsdk activate latest && source ./emsdk_env.sh && cd ../build && make
     - name: Get Kinc_bin
-      run: git clone https://github.com/foundry2D/Kinc_bin
+      run: git clone https://github.com/Kode-Community/Kinc_bin
     - name: Copy wasm binary
       run:  cp build/Release/Kinc.wasm Kinc_bin/Kinc_webgl.wasm
     - name: Copy js binary
@@ -40,6 +40,6 @@ jobs:
     - name: Tag binary
       run: git -C Kinc_bin tag html5_webgl_$GITHUB_SHA
     - name: Push binary
-      run: git -C Kinc_bin push https://foundbot:$FOUNDBOT_PASS@github.com/foundry2D/Kinc_bin.git master --tags
+      run: git -C Kinc_bin push https://foundbot:$FOUNDBOT_PASS@github.com/Kode-Community/Kinc_bin.git master --tags
       env:
         FOUNDBOT_PASS: ${{ secrets.FOUNDBOT_PASS }}

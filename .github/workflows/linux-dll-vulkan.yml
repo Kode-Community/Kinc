@@ -28,7 +28,7 @@ jobs:
     - name: Compile
       run: nodejs_bin/node make.js -g vulkan --kinc . --noshaders --dynlib --compile
     - name: Get Kinc_bin
-      run: git clone https://github.com/foundry2D/Kinc_bin
+      run: git clone https://github.com/Kode-Community/Kinc_bin
     - name: Copy binary
       run:  cp build/Release/Kinc.so Kinc_bin/Kinc_vulkan.so
     - name: Set name
@@ -40,6 +40,6 @@ jobs:
     - name: Tag binary
       run: git -C Kinc_bin tag linux_vulkan_$GITHUB_SHA
     - name: Push binary
-      run: git -C Kinc_bin push https://foundbot:$FOUNDBOT_PASS@github.com/foundry2D/Kinc_bin.git master --tags
+      run: git -C Kinc_bin push https://foundbot:$FOUNDBOT_PASS@github.com/Kode-Community/Kinc_bin.git master --tags
       env:
         FOUNDBOT_PASS: ${{ secrets.FOUNDBOT_PASS }}
