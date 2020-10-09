@@ -27,6 +27,8 @@ jobs:
       run: git clone https://github.com/emscripten-core/emsdk.git && cd emsdk && ./emsdk install latest && ./emsdk activate latest && source ./emsdk_env.sh && cd ../build && make
     - name: Get Kinc_bin
       run: git clone https://github.com/Kode-Community/Kinc_bin
+    - name: ls files
+      run:  ls build/Release/
     - name: Copy wasm binary
       run:  cp build/Release/Kinc.wasm Kinc_bin/Kinc_webgl.wasm
     - name: Copy js binary
