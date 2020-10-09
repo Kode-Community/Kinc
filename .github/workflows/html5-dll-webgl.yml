@@ -19,7 +19,7 @@ jobs:
       run: git submodule update --init --recursive
     - name: Get Node.js
       run: git clone https://github.com/Kode/nodejs_bin.git --depth 1
-    - name: Setup Node.js
+    - name: Setup Node.js 
       run: nodejs_bin/copysysbin.sh
     - name: Compile (kincmake)
       run: nodejs_bin/node make.js html5 --kinc . --noshaders --dynlib
