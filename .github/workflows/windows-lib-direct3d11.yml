@@ -25,8 +25,6 @@ jobs:
       run: git config --global user.name "foundbot"
     - name: Set email
       run: git config --global user.email "foundry2dbot@gmail.com"
-    - name: Wait 60
-      run: timeout 60
     - name: Get Kinc_bin
       run: git clone https://github.com/Kode-Community/Kinc_bin
     - name: Copy binary
