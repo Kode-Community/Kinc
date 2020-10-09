@@ -28,11 +28,13 @@ jobs:
     - name: Get Kinc_bin
       run: git clone https://github.com/Kode-Community/Kinc_bin
     - name: ls
-      run:  ls ./build
+      run:  ls ./build/Deployment
     - name: Copy wasm binary
-      run:  cp ./Tests/html5/Deployment/Kinc.wasm Kinc_bin/Kinc_webgl.wasm
+      run:  cp ./build/kore.wasm Kinc_bin/Kinc_webgl.wasm
     - name: Copy js binary
-      run:  cp ./Tests/html5/Deployment/Kinc.js Kinc_bin/Kinc_webgl.js
+      run:  cp ./build/kore.js Kinc_bin/Kinc_webgl.js
+    - name: Copy html file
+      run:  cp ./build/kore.html Kinc_bin/Kinc.html
     - name: Set name
       run: git config --global user.name "foundbot"
     - name: Set email
