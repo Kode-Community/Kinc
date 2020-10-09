@@ -1,14 +1,11 @@
-name: HTML5 Library (WebGL)
+name: HTML5Library(WebGL)
 
 on:
   workflow_run:
-    workflows: ["Windows Lib (Direct3D 12)"]
+    workflows: ["WindowsLib(Direct3D 12)"]
     branches: [master]
     types: 
       - completed
-      
-
-
 jobs:
   build:
 

@@ -1,14 +1,11 @@
-name: Linux .so (OpenGL)
+name: Linux.so(OpenGL)
 
 on:
   workflow_run:
-    workflows: ["HTML5 Library (WebGL)"]
+    workflows: ["HTML5Library(WebGL)"]
     branches: [master]
     types: 
       - completed
-      
-
-
 jobs:
   build:
 

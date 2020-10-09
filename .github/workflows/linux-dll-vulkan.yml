@@ -1,14 +1,11 @@
-name: Linux .so (Vulkan)
+name: Linux.so(Vulkan)
 
 on:
   workflow_run:
-    workflows: ["Linux .so (OpenGL)"]
+    workflows: ["Linux.so(OpenGL)"]
     branches: [master]
     types: 
       - completed
-      
-
-
 jobs:
   build:
 

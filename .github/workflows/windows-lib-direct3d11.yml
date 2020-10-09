@@ -1,14 +1,11 @@
-name: Windows Lib (Direct3D 11)
+name: WindowsLib(Direct3D 11)
 
 on:
   workflow_run:
-    workflows: ["Windows DLL (Direct3D 12)"]
+    workflows: ["WindowsDLL(Direct3D 12)"]
     branches: [master]
-    types: 
+    types:
       - completed
-      
-
-
 jobs:
   build:
 
