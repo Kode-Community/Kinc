@@ -33,6 +33,8 @@ jobs:
       run: git -C Kinc_bin commit -a -m "Update Windows Lib D3D12 binary to ${env:GITHUB_SHA}."
     - name: Tag binary
       run: git -C Kinc_bin tag windows_D3D12_lib_${env:GITHUB_SHA}
+    - name: Pull before push
+      run: git -C Kinc_bin pull
     - name: Push binary
       run: git -C Kinc_bin push https://foundbot:${env:FOUNDBOT_PASS}@github.com/Kode-Community/Kinc_bin.git master --tags
       env:
