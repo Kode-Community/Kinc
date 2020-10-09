@@ -1,12 +1,13 @@
 name: Linux .so (Vulkan)
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+  workflow_run:
+    workflows: ["Linux .so (OpenGL)"]
+    branches: [master]
+    types: 
+      - completed
+      
+
 
 jobs:
   build:

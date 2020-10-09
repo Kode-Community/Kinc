@@ -1,12 +1,13 @@
 name: HTML5 Library (WebGL)
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+  workflow_run:
+    workflows: ["Windows Lib (Direct3D 12)"]
+    branches: [master]
+    types: 
+      - completed
+      
+
 
 jobs:
   build:

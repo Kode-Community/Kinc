@@ -1,12 +1,13 @@
 name: Linux .so (OpenGL)
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+  workflow_run:
+    workflows: ["HTML5 Library (WebGL)"]
+    branches: [master]
+    types: 
+      - completed
+      
+
 
 jobs:
   build:
