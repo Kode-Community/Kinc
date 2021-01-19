@@ -28,7 +28,6 @@ namespace {
     const ASensor *accelerometerSensor = nullptr;
     const ASensor *gyroSensor = nullptr;
     ASensorEventQueue *sensorEventQueue = nullptr;
-    bool shift = false;
     // int screenRotation = 0;
 
     ndk_helper::GLContext *glContext = nullptr;
@@ -158,10 +157,82 @@ namespace {
 			int32_t code = AKeyEvent_getKeyCode(event);
 
 			if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN) {
+				int shift = AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON;
+				if (shift) {
+					switch (code) {
+					case AKEYCODE_1:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_EXCLAMATION);
+						kinc_internal_keyboard_trigger_key_press('!');
+						return 1;
+					case AKEYCODE_4:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_DOLLAR);
+						kinc_internal_keyboard_trigger_key_press('$');
+						return 1;
+					case AKEYCODE_5:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_PERCENT);
+						kinc_internal_keyboard_trigger_key_press('%');
+						return 1;
+					case AKEYCODE_6:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_CIRCUMFLEX);
+						kinc_internal_keyboard_trigger_key_press('^');
+						return 1;
+					case AKEYCODE_7:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_AMPERSAND);
+						kinc_internal_keyboard_trigger_key_press('&');
+						return 1;
+					case AKEYCODE_9:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_OPEN_PAREN);
+						kinc_internal_keyboard_trigger_key_press('(');
+						return 1;
+					case AKEYCODE_0:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_CLOSE_PAREN);
+						kinc_internal_keyboard_trigger_key_press(')');
+						return 1;
+					case AKEYCODE_COMMA:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_LESS_THAN);
+						kinc_internal_keyboard_trigger_key_press('<');
+						return 1;
+					case AKEYCODE_PERIOD:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_GREATER_THAN);
+						kinc_internal_keyboard_trigger_key_press('>');
+						return 1;
+					case AKEYCODE_MINUS:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_UNDERSCORE);
+						kinc_internal_keyboard_trigger_key_press('_');
+						return 1;
+					case AKEYCODE_SLASH:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_QUESTIONMARK);
+						kinc_internal_keyboard_trigger_key_press('?');
+						return 1;
+					case AKEYCODE_BACKSLASH:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_PIPE);
+						kinc_internal_keyboard_trigger_key_press('|');
+						return 1;
+					case AKEYCODE_LEFT_BRACKET:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_OPEN_CURLY_BRACKET);
+						kinc_internal_keyboard_trigger_key_press('{');
+						return 1;
+					case AKEYCODE_RIGHT_BRACKET:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_CLOSE_CURLY_BRACKET);
+						kinc_internal_keyboard_trigger_key_press('}');
+						return 1;
+					case AKEYCODE_SEMICOLON:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_COLON);
+						kinc_internal_keyboard_trigger_key_press(':');
+						return 1;
+					case AKEYCODE_APOSTROPHE:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_DOUBLE_QUOTE);
+						kinc_internal_keyboard_trigger_key_press('"');
+						return 1;
+					case AKEYCODE_GRAVE:
+						kinc_internal_keyboard_trigger_key_down(KINC_KEY_TILDE);
+						kinc_internal_keyboard_trigger_key_press('~');
+						return 1;
+					}
+				}
 				switch (code) {
 				case AKEYCODE_SHIFT_LEFT:
 				case AKEYCODE_SHIFT_RIGHT:
-					shift = true;
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_SHIFT);
 					return 1;
 				case AKEYCODE_DEL:
@@ -239,55 +310,75 @@ namespace {
 				case AKEYCODE_STAR:
 				case AKEYCODE_NUMPAD_MULTIPLY:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_MULTIPLY);
+					kinc_internal_keyboard_trigger_key_press('*');
 					return 1;
-				// case AKEYCODE_POUND:
-				//	Kore::Keyboard::the()->_keydown((Kore::KeyCode)'&', '&');
-				//	return 1;
+				case AKEYCODE_POUND:
+					kinc_internal_keyboard_trigger_key_down(KINC_KEY_HASH);
+					kinc_internal_keyboard_trigger_key_press('#');
+					return 1;
 				case AKEYCODE_COMMA:
 				case AKEYCODE_NUMPAD_COMMA:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_COMMA);
+					kinc_internal_keyboard_trigger_key_press(',');
 					return 1;
 				case AKEYCODE_PERIOD:
 				case AKEYCODE_NUMPAD_DOT:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_PERIOD);
+					kinc_internal_keyboard_trigger_key_press('.');
 					return 1;
 				case AKEYCODE_SPACE:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_SPACE);
+					kinc_internal_keyboard_trigger_key_press(' ');
 					return 1;
 				case AKEYCODE_MINUS:
 				case AKEYCODE_NUMPAD_SUBTRACT:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_HYPHEN_MINUS);
+					kinc_internal_keyboard_trigger_key_press('-');
 					return 1;
 				case AKEYCODE_EQUALS:
 				case AKEYCODE_NUMPAD_EQUALS:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_EQUALS);
+					kinc_internal_keyboard_trigger_key_press('=');
 					return 1;
 				case AKEYCODE_LEFT_BRACKET:
 				case AKEYCODE_NUMPAD_LEFT_PAREN:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_OPEN_BRACKET);
+					kinc_internal_keyboard_trigger_key_press('[');
 					return 1;
 				case AKEYCODE_RIGHT_BRACKET:
 				case AKEYCODE_NUMPAD_RIGHT_PAREN:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_CLOSE_BRACKET);
+					kinc_internal_keyboard_trigger_key_press(']');
 					return 1;
 				case AKEYCODE_BACKSLASH:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_BACK_SLASH);
+					kinc_internal_keyboard_trigger_key_press('\\');
 					return 1;
 				case AKEYCODE_SEMICOLON:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_SEMICOLON);
+					kinc_internal_keyboard_trigger_key_press(';');
 					return 1;
-				// case AKEYCODE_APOSTROPHE:
-				//	return 1;
+				case AKEYCODE_APOSTROPHE:
+					kinc_internal_keyboard_trigger_key_down(KINC_KEY_QUOTE);
+					kinc_internal_keyboard_trigger_key_press('\'');
+					return 1;
+				case AKEYCODE_GRAVE:
+					kinc_internal_keyboard_trigger_key_down(KINC_KEY_BACK_QUOTE);
+					kinc_internal_keyboard_trigger_key_press('`');
+					return 1;
 				case AKEYCODE_SLASH:
 				case AKEYCODE_NUMPAD_DIVIDE:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_SLASH);
+					kinc_internal_keyboard_trigger_key_press('/');
 					return 1;
 				case AKEYCODE_AT:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_AT);
+					kinc_internal_keyboard_trigger_key_press('@');
 					return 1;
 				case AKEYCODE_PLUS:
 				case AKEYCODE_NUMPAD_ADD:
 					kinc_internal_keyboard_trigger_key_down(KINC_KEY_PLUS);
+					kinc_internal_keyboard_trigger_key_press('+');
 					return 1;
 				// (DK) Amazon FireTV remote/controller mappings
 				// (DK) TODO handle multiple pads (up to 4 possible)
@@ -323,10 +414,65 @@ namespace {
 				}
 			}
 			else if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_UP) {
+				int shift = AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON;
+				if (shift) {
+					switch (code) {
+					case AKEYCODE_1:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_EXCLAMATION);
+						return 1;
+					case AKEYCODE_4:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_DOLLAR);
+						return 1;
+					case AKEYCODE_5:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_PERCENT);
+						return 1;
+					case AKEYCODE_6:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_CIRCUMFLEX);
+						return 1;
+					case AKEYCODE_7:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_AMPERSAND);
+						return 1;
+					case AKEYCODE_9:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_OPEN_PAREN);
+						return 1;
+					case AKEYCODE_0:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_CLOSE_PAREN);
+						return 1;
+					case AKEYCODE_COMMA:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_LESS_THAN);
+						return 1;
+					case AKEYCODE_PERIOD:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_GREATER_THAN);
+						return 1;
+					case AKEYCODE_MINUS:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_UNDERSCORE);
+						return 1;
+					case AKEYCODE_SLASH:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_QUESTIONMARK);
+						return 1;
+					case AKEYCODE_BACKSLASH:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_PIPE);
+						return 1;
+					case AKEYCODE_LEFT_BRACKET:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_OPEN_CURLY_BRACKET);
+						return 1;
+					case AKEYCODE_RIGHT_BRACKET:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_CLOSE_CURLY_BRACKET);
+						return 1;
+					case AKEYCODE_SEMICOLON:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_COLON);
+						return 1;
+					case AKEYCODE_APOSTROPHE:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_DOUBLE_QUOTE);
+						return 1;
+					case AKEYCODE_GRAVE:
+						kinc_internal_keyboard_trigger_key_up(KINC_KEY_TILDE);
+						return 1;
+					}
+				}
 				switch (code) {
 				case AKEYCODE_SHIFT_LEFT:
 				case AKEYCODE_SHIFT_RIGHT:
-					shift = false;
 					kinc_internal_keyboard_trigger_key_up(KINC_KEY_SHIFT);
 					return 1;
 				case AKEYCODE_DEL:
@@ -404,9 +550,9 @@ namespace {
 				case AKEYCODE_NUMPAD_MULTIPLY:
 					kinc_internal_keyboard_trigger_key_up(KINC_KEY_MULTIPLY);
 					return 1;
-				// case AKEYCODE_POUND:
-				//	Kore::Keyboard::the()->_keyup((Kore::KeyCode)'&', '&');
-				//	return 1;
+				case AKEYCODE_POUND:
+				  kinc_internal_keyboard_trigger_key_up(KINC_KEY_HASH);
+					return 1;
 				case AKEYCODE_COMMA:
 				case AKEYCODE_NUMPAD_COMMA:
 					kinc_internal_keyboard_trigger_key_up(KINC_KEY_COMMA);
@@ -440,9 +586,12 @@ namespace {
 				case AKEYCODE_SEMICOLON:
 					kinc_internal_keyboard_trigger_key_up(KINC_KEY_SEMICOLON);
 					return 1;
-				// case AKEYCODE_APOSTROPHE:
-				//	Kore::Keyboard::the()->_keyup((Kore::KeyCode)'\'', '\'');
-				//	return 1;
+				case AKEYCODE_APOSTROPHE:
+					kinc_internal_keyboard_trigger_key_up(KINC_KEY_QUOTE);
+					return 1;
+				case AKEYCODE_GRAVE:
+					kinc_internal_keyboard_trigger_key_up(KINC_KEY_BACK_QUOTE);
+					return 1;
 				case AKEYCODE_SLASH:
 				case AKEYCODE_NUMPAD_DIVIDE:
 					kinc_internal_keyboard_trigger_key_up(KINC_KEY_SLASH);
