@@ -6,9 +6,9 @@
 #include <Kore/IO/BufferReader.h>
 #include <Kore/IO/FileReader.h>
 #include <Kore/IO/Reader.h>
-#include <Kore/Log.h>
 
 #include <kinc/image.h>
+#include <kinc/log.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,13 +83,15 @@ int Graphics1::Image::sizeOf(Image::Format format) {
 
 Graphics1::Image::Image(int width, int height, Format format, bool readable) : width(width), height(height), depth(1), format(format), readable(readable) {
 	compression = ImageCompressionNone;
-	data = new u8[width * height * sizeOf(format)];
+	dataSize = width * height * sizeOf(format);
+	data = new u8[dataSize];
 }
 
 Graphics1::Image::Image(int width, int height, int depth, Format format, bool readable)
     : width(width), height(height), depth(depth), format(format), readable(readable) {
 	compression = ImageCompressionNone;
-	data = new u8[width * height * depth * sizeOf(format)];
+	dataSize = width * height * depth * sizeOf(format);
+	data = new u8[dataSize];
 }
 
 Graphics1::Image::Image(const char *filename, bool readable) : depth(1), format(RGBA32), readable(readable) {
@@ -122,17 +124,20 @@ void Graphics1::Image::init(Kore::Reader &file, const char *filename, bool reada
 }
 
 Graphics1::Image::~Image() {
-	if (readable) {
+	if (data != nullptr) {
 		free(data);
 		data = nullptr;
 	}
 }
 
 int Graphics1::Image::at(int x, int y) {
-	if (data == nullptr)
+	if (data == nullptr) {
+		kinc_log(KINC_LOG_LEVEL_WARNING, "Attempting to read a non-readable image.");
 		return 0;
-	else
+	}
+	else {
 		return *(int *)&((u8 *)data)[width * sizeOf(format) * y + x * sizeOf(format)];
+	}
 }
 
 u8 *Graphics1::Image::getPixels() {
