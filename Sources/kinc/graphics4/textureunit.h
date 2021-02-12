@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Kore/ShaderImpl.h>
-#include <Kore/TextureImpl.h>
+#include <kinc/backend/graphics4/shader.h>
+#include <kinc/backend/graphics4/texture.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -4,7 +4,7 @@
 #include <kinc/graphics4/rendertarget.h>
 #include <kinc/graphics4/textureunit.h>
 
-#include <Kore/PipelineStateImpl.h>
+#include <kinc/backend/graphics4/pipeline.h>
 
 #ifdef __cplusplus
 extern "C" {

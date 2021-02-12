@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Kore/PipelineStateImpl.h>
-#include <Kore/ShaderImpl.h>
+#include <kinc/backend/graphics4/pipeline.h>
+#include <kinc/backend/graphics4/shader.h>
 
 #ifdef __cplusplus
 extern "C" {

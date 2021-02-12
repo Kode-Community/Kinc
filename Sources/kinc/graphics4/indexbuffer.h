@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Kore/IndexBufferImpl.h>
+#include <kinc/backend/graphics4/indexbuffer.h>
 
 #ifdef __cplusplus
 extern "C" {
