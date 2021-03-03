@@ -1,33 +1,31 @@
 #pragma once
 
-#include <kinc/graphics4/texture.h>
-#include <kinc/io/filereader.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class CTextureRenderer;
+typedef struct {
+	void *renderer;
+	double duration;
+	double position;
+	bool finished;
+	bool paused;
+} kinc_video_impl_t;
 
-namespace Kore {
-	class VideoSoundStream;
+typedef struct kinc_internal_video_sound_stream {
+	int nothing;
+} kinc_internal_video_sound_stream_t;
 
-	class Video {
-	public:
-		Video(const char *filename);
-		~Video() {
-			// delete image;
-		}
-		void play();
-		void pause();
-		void stop();
-		int width();
-		int height();
-		kinc_g4_texture_t *currentImage();
-		double duration;
-		double position;
-		bool finished;
-		bool paused;
-		void update(double time);
+void kinc_internal_video_sound_stream_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency);
 
-	private:
-		// Graphics4::Texture* image;
-		CTextureRenderer *renderer;
-	};
+void kinc_internal_video_sound_stream_destroy(kinc_internal_video_sound_stream_t *stream);
+
+void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count);
+
+float kinc_internal_video_sound_stream_next_sample(kinc_internal_video_sound_stream_t *stream);
+
+bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream);
+
+#ifdef __cplusplus
 }
+#endif

@@ -1,10 +1,8 @@
 #include "pch.h"
 
-#include "Video.h"
+#include <kinc/video.h>
 
 #include <streams.h>
-
-using namespace Kore;
 
 namespace {
 	IGraphBuilder *graphBuilder;
@@ -33,7 +31,7 @@ public:
 	kinc_g4_texture_t image;
 	int width;
 	int height;
-	u8 *pixels;
+	uint8_t *pixels;
 };
 
 CTextureRenderer::CTextureRenderer(LPUNKNOWN pUnk, HRESULT *phr) : CBaseVideoRenderer(__uuidof(CLSID_TextureRenderer), TEXT("Texture Renderer"), pUnk, phr) {
@@ -72,7 +70,7 @@ HRESULT CTextureRenderer::SetMediaType(const CMediaType *pmt) {
 	width = info->bmiHeader.biWidth;
 	height = abs(info->bmiHeader.biHeight);
 	kinc_g4_texture_init(&image, width, height, KINC_IMAGE_FORMAT_RGBA32);
-	pixels = (u8 *)malloc(width * height * 3);
+	pixels = (uint8_t *)malloc(width * height * 3);
 
 	for (int y = 0; y < height; ++y) {
 		for (int x = 0; x < width; ++x) {
@@ -99,11 +97,11 @@ HRESULT CTextureRenderer::DoRenderSample(IMediaSample *sample) {
 	return S_OK;
 }
 
-Video::Video(const char *filename) {
-	duration = 1000 * 10;
-	position = 0;
-	finished = false;
-	paused = false;
+void kinc_video_init(kinc_video_t *video, const char *filename) {
+	video->impl.duration = 1000 * 10;
+	video->impl.position = 0;
+	video->impl.finished = false;
+	video->impl.paused = false;
 	// image = new Graphics4::Texture(100, 100, Graphics4::Image::RGBA32, false);
 
 	HRESULT hr = S_OK;
@@ -111,8 +109,8 @@ Video::Video(const char *filename) {
 	IPin *pFSrcPinOut;  // Source Filter Output Pin
 
 	hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, __uuidof(IGraphBuilder), (void **)&graphBuilder);
-	renderer = new CTextureRenderer(NULL, &hr);
-	hr = graphBuilder->AddFilter(renderer, L"TEXTURERENDERER");
+	video->impl.renderer = new CTextureRenderer(NULL, &hr);
+	hr = graphBuilder->AddFilter((CTextureRenderer *)video->impl.renderer, L"TEXTURERENDERER");
 	wchar_t wideFilename[2048];
 	mbstowcs(wideFilename, filename, 2048 - 1);
 	hr = graphBuilder->AddSourceFilter(wideFilename, L"SOURCE", &pFSrc);
@@ -123,12 +121,15 @@ Video::Video(const char *filename) {
 	graphBuilder->QueryInterface(&mediaPosition);
 	graphBuilder->QueryInterface(&mediaEvent);
 
-	mediaPosition->get_Duration(&duration);
-	this->position = 0;
+	mediaPosition->get_Duration(&video->impl.duration);
+	video->impl.position = 0;
 }
 
-kinc_g4_texture_t *Video::currentImage() {
-	u8 *pixels = kinc_g4_texture_lock(&renderer->image);
+void kinc_video_destroy(kinc_video_t *video) {}
+
+kinc_g4_texture_t *kinc_video_current_image(kinc_video_t *video) {
+	CTextureRenderer *renderer = (CTextureRenderer *)video->impl.renderer;
+	uint8_t *pixels = kinc_g4_texture_lock(&renderer->image);
 	int stride = kinc_g4_texture_stride(&renderer->image);
 	for (int y = 0; y < renderer->height; ++y) {
 		for (int x = 0; x < renderer->width; ++x) {
@@ -140,31 +141,63 @@ kinc_g4_texture_t *Video::currentImage() {
 	}
 	kinc_g4_texture_unlock(&renderer->image);
 
-	mediaPosition->get_CurrentPosition(&position);
+	mediaPosition->get_CurrentPosition(&video->impl.position);
 
 	return &renderer->image;
 }
 
-int Video::width() {
+int kinc_video_width(kinc_video_t *video) {
+	CTextureRenderer *renderer = (CTextureRenderer *)video->impl.renderer;
 	return renderer->width;
 }
 
-int Video::height() {
+int kinc_video_height(kinc_video_t *video) {
+	CTextureRenderer *renderer = (CTextureRenderer *)video->impl.renderer;
 	return renderer->height;
 }
 
-void Video::play() {
+void kinc_video_play(kinc_video_t *video) {
 	mediaControl->Run();
 }
 
-void Video::pause() {
+void kinc_video_pause(kinc_video_t *video) {
 	mediaControl->Pause();
 }
 
-void Video::stop() {
+void kinc_video_stop(kinc_video_t *video) {
 	mediaControl->Stop();
 }
 
-void Video::update(double time) {
+void kinc_video_update(kinc_video_t *video, double time) {
 	mediaPosition->put_CurrentPosition(time);
+}
+
+double kinc_video_duration(kinc_video_t *video) {
+	return video->impl.duration;
+}
+
+double kinc_video_position(kinc_video_t *video) {
+	return video->impl.position;
+}
+
+bool kinc_video_finished(kinc_video_t *video) {
+	return video->impl.finished;
+}
+
+bool kinc_video_paused(kinc_video_t *video) {
+	return video->impl.paused;
+}
+
+void kinc_internal_video_sound_stream_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency) {}
+
+void kinc_internal_video_sound_stream_destroy(kinc_internal_video_sound_stream_t *stream) {}
+
+void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count) {}
+
+float kinc_internal_video_sound_stream_next_sample(kinc_internal_video_sound_stream_t *stream) {
+	return 0.0f;
+}
+
+bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream) {
+	return true;
 }

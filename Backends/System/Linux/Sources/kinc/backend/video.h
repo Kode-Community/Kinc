@@ -1,40 +1,27 @@
-#include <Kore/Graphics4/Texture.h>
-#include <Kore/IO/FileReader.h>
+#pragma once
 
-namespace Kore {
-	class VideoSoundStream;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-	class Video {
-	public:
-		Video(const char* filename) {
-			duration = 1000 * 10;
-			position = 0;
-			finished = false;
-			paused = false;
-			image = new Graphics4::Texture(100, 100, Graphics4::Image::RGBA32, false);
-		}
-		~Video() {
-			delete image;
-		}
-		void play() {}
-		void pause() {}
-		void stop() {}
-		int width() {
-			return 100;
-		}
-		int height() {
-			return 100;
-		}
-		Graphics4::Texture* currentImage() {
-			return image;
-		}
-		double duration; // milliseconds
-		double position; // milliseconds
-		bool finished;
-		bool paused;
-		void update(double time) {}
+typedef struct {
+	int nothing;
+} kinc_video_impl_t;
 
-	private:
-		Graphics4::Texture* image;
-	};
+typedef struct kinc_internal_video_sound_stream {
+	int nothing;
+} kinc_internal_video_sound_stream_t;
+
+void kinc_internal_video_sound_stream_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency);
+
+void kinc_internal_video_sound_stream_destroy(kinc_internal_video_sound_stream_t *stream);
+
+void kinc_internal_video_sound_stream_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count);
+
+float kinc_internal_video_sound_stream_next_sample(kinc_internal_video_sound_stream_t *stream);
+
+bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream);
+
+#ifdef __cplusplus
 }
+#endif

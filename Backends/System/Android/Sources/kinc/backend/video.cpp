@@ -1,13 +1,13 @@
 #include "pch.h"
 
-#include "video.h"
+#include <kinc/video.h>
 
-#include <Kore/Audio1/Audio.h>
+#include <kinc/audio1/audio.h>
 #include <kinc/graphics4/texture.h>
-#include <Kore/IO/FileReader.h>
+#include <kinc/io/filereader.h>
 #include <kinc/log.h>
 #include <kinc/system.h>
-#include <kinc/backend/VideoSoundStream.h>
+
 #include <android_native_app_glue.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,25 +26,31 @@
 #include <android/native_window_jni.h>
 #endif
 
-using namespace Kore;
-
-VideoSoundStream::VideoSoundStream(int nChannels, int freq) : bufferSize(1), bufferReadPosition(0), bufferWritePosition(0), read(0), written(0) {}
-
-void VideoSoundStream::insertData(float* data, int nSamples) {}
-
-float VideoSoundStream::nextSample() {
-	return 0;
+void kinc_video_sound_stream_impl_init(kinc_internal_video_sound_stream_t *stream, int channel_count, int frequency) {
+    stream->bufferSize = 1;
+    stream->bufferReadPosition = 0;
+    stream->bufferWritePosition = 0;
+    stream->read = 0;
+    stream->written = 0;
 }
 
-bool VideoSoundStream::ended() {
-	return false;
+void kinc_video_sound_stream_impl_destroy(kinc_internal_video_sound_stream_t *stream) {}
+
+void kinc_video_sound_stream_impl_insert_data(kinc_internal_video_sound_stream_t *stream, float *data, int sample_count) {}
+
+float kinc_internal_video_sound_stream_next_sample(kinc_internal_video_sound_stream_t *stream) {
+    return 0;
+}
+
+bool kinc_internal_video_sound_stream_ended(kinc_internal_video_sound_stream_t *stream) {
+    return false;
 }
 
 #if KORE_ANDROID_API >= 15
 
 namespace {
 	const int videosCount = 10;
-	Video* videos[videosCount] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+	kinc_video_t* videos[videosCount] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 #define NB_MAXAL_INTERFACES 3 // XAAndroidBufferQueueItf, XAStreamInformationItf and XAPlayItf
 #define NB_BUFFERS 8
@@ -302,7 +308,7 @@ namespace {
 		assert(XA_RESULT_SUCCESS == res);
 
 		// open the file to play
-		file = AAssetManager_open(KincAndroid::getAssetManager(), filename, AASSET_MODE_STREAMING);
+		file = AAssetManager_open(kinc_android_get_asset_manager(), filename, AASSET_MODE_STREAMING);
 		if (file == NULL) {
 			kinc_log(KINC_LOG_LEVEL_INFO, "Could not find video file.");
 			return false;
@@ -433,15 +439,15 @@ namespace {
 
 #endif
 
-extern "C" JNIEXPORT void JNICALL Java_tech_kode_kore_KoreMoviePlayer_nativeCreate(JNIEnv* env, jobject jobj, jstring jpath, jobject surface, jint id) {
+extern "C" JNIEXPORT void JNICALL Java_tech_kode_kinc_KincMoviePlayer_nativeCreate(JNIEnv* env, jobject jobj, jstring jpath, jobject surface, jint id) {
 #if KORE_ANDROID_API >= 15
 	const char* path = env->GetStringUTFChars(jpath, NULL);
 	AndroidVideo* av = new AndroidVideo;
 	av->theNativeWindow = ANativeWindow_fromSurface(env, surface);
 	av->init(path);
 	for (int i = 0; i < 10; ++i) {
-		if (videos[i] != nullptr && videos[i]->id == id) {
-			videos[i]->androidVideo = av;
+		if (videos[i] != nullptr && videos[i]->impl.id == id) {
+			videos[i]->impl.androidVideo = av;
 			break;
 		}
 	}
@@ -451,42 +457,44 @@ extern "C" JNIEXPORT void JNICALL Java_tech_kode_kore_KoreMoviePlayer_nativeCrea
 
 void KoreAndroidVideoInit() {
 	JNIEnv* env;
-	KincAndroid::getActivity()->vm->AttachCurrentThread(&env, nullptr);
+	kinc_android_get_activity()->vm->AttachCurrentThread(&env, nullptr);
 
-	jclass clazz = KincAndroid::findClass(env, "tech.kinc.KincMoviePlayer");
+	jclass clazz = kinc_android_find_class(env, "tech.kinc.KincMoviePlayer");
 
 	// String path, Surface surface, int id
 	JNINativeMethod methodTable[] = {
-	    {"nativeCreate", "(Ljava/lang/String;Landroid/view/Surface;I)V", (void*)Java_tech_kode_kore_KoreMoviePlayer_nativeCreate}};
+	    {"nativeCreate", "(Ljava/lang/String;Landroid/view/Surface;I)V", (void*)Java_tech_kode_kinc_KincMoviePlayer_nativeCreate}};
 
 	int methodTableSize = sizeof(methodTable) / sizeof(methodTable[0]);
 
 	env->RegisterNatives(clazz, methodTable, methodTableSize);
 
-	KincAndroid::getActivity()->vm->DetachCurrentThread();
+	kinc_android_get_activity()->vm->DetachCurrentThread();
 }
 
-Video::Video(const char* filename) : playing(false), sound(nullptr) {
+void kinc_video_init(kinc_video_t* video, const char* filename) {
+	video->impl.playing = false;
+	video->impl.sound = nullptr;
 #if KORE_ANDROID_API >= 15
 	kinc_log(KINC_LOG_LEVEL_INFO, "Opening video %s.", filename);
-	myWidth = 1023;
-	myHeight = 684;
+	video->impl.myWidth = 1023;
+	video->impl.myHeight = 684;
 
-	next = 0;
-	audioTime = 0;
+	video->impl.next = 0;
+	video->impl.audioTime = 0;
 
 	JNIEnv* env = nullptr;
-	KincAndroid::getActivity()->vm->AttachCurrentThread(&env, nullptr);
-	jclass koreMoviePlayerClass = KincAndroid::findClass(env, "tech.kinc.KoreMoviePlayer");
+	kinc_android_get_activity()->vm->AttachCurrentThread(&env, nullptr);
+	jclass koreMoviePlayerClass = kinc_android_find_class(env, "tech.kinc.KoreMoviePlayer");
 	jmethodID constructor = env->GetMethodID(koreMoviePlayerClass, "<init>", "(Ljava/lang/String;)V");
 	jobject object = env->NewObject(koreMoviePlayerClass, constructor, env->NewStringUTF(filename));
 
 	jmethodID getId = env->GetMethodID(koreMoviePlayerClass, "getId", "()I");
-	id = env->CallIntMethod(object, getId);
+	video->impl.id = env->CallIntMethod(object, getId);
 
 	for (int i = 0; i < videosCount; ++i) {
 		if (videos[i] == nullptr) {
-			videos[i] = this;
+			videos[i] = video;
 			break;
 		}
 	}
@@ -497,19 +505,19 @@ Video::Video(const char* filename) : playing(false), sound(nullptr) {
 	jmethodID getTextureId = env->GetMethodID(koreMoviePlayerClass, "getTextureId", "()I");
 	int texid = env->CallIntMethod(object, getTextureId);
 
-	KincAndroid::getActivity()->vm->DetachCurrentThread();
+	kinc_android_get_activity()->vm->DetachCurrentThread();
 
-	kinc_g4_texture_init_from_id(&image, texid);
+	kinc_g4_texture_init_from_id(&video->impl.image, texid);
 #endif
 }
 
-Video::~Video() {
+void kinc_video_destroy(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	stop();
-	AndroidVideo* av = (AndroidVideo*)androidVideo;
+	kinc_video_stop(video);
+	AndroidVideo* av = (AndroidVideo*)video->impl.androidVideo;
 	av->shutdown();
 	for (int i = 0; i < 10; ++i) {
-		if (videos[i] == this) {
+		if (videos[i] == video) {
 			videos[i] = nullptr;
 			break;
 		}
@@ -517,49 +525,63 @@ Video::~Video() {
 #endif
 }
 
-void Video::play() {
+void kinc_video_play(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	playing = true;
-	start = kinc_time();
+	video->impl.playing = true;
+	video->impl.start = kinc_time();
 #endif
 }
 
-void Video::pause() {
+void kinc_video_pause(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	playing = false;
+	video->impl.playing = false;
 #endif
 }
 
-void Video::stop() {
+void kinc_video_stop(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	pause();
+	kinc_video_pause(video);
 #endif
 }
 
-void Video::updateImage() {}
+void kinc_video_update(kinc_video_t* video, double time) {}
 
-void Video::update(double time) {}
-
-int Video::width() {
+int kinc_video_width(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	return myWidth;
+	return video->impl.myWidth;
 #else
 	return 512;
 #endif
 }
 
-int Video::height() {
+int kinc_video_height(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	return myHeight;
+	return video->impl.myHeight;
 #else
 	return 512;
 #endif
 }
 
-kinc_g4_texture_t *Video::currentImage() {
+kinc_g4_texture_t *kinc_video_current_image(kinc_video_t* video) {
 #if KORE_ANDROID_API >= 15
-	return &image;
+	return &video->impl.image;
 #else
 	return nullptr;
 #endif
+}
+
+double kinc_video_duration(kinc_video_t *video) {
+	return 0.0;
+}
+
+double kinc_video_position(kinc_video_t *video) {
+	return 0.0;
+}
+
+bool kinc_video_finished(kinc_video_t *video) {
+	return false;
+}
+
+bool kinc_video_paused(kinc_video_t *video) {
+	return !video->impl.playing;
 }

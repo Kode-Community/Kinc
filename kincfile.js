@@ -108,6 +108,9 @@ if (platform === Platform.Windows) {
 		addBackend('Graphics5/Vulkan');
 		project.addDefine('KORE_VULKAN');
 		project.addDefine('VK_USE_PLATFORM_WIN32_KHR');
+		if (!process.env.VULKAN_SDK) {
+			throw 'Could not find a Vulkan SDK';
+		}
 		project.addLibFor('Win32', path.join(process.env.VULKAN_SDK, 'Lib32', 'vulkan-1'));
 		project.addLibFor('x64', path.join(process.env.VULKAN_SDK, 'Lib', 'vulkan-1'));
 		let libs = fs.readdirSync(path.join(process.env.VULKAN_SDK, 'Lib32'));
@@ -360,6 +363,7 @@ else if (platform === Platform.Linux) {
 	}
 	project.addDefine('KORE_POSIX');
 	project.addDefine('_POSIX_C_SOURCE=200112L');
+	project.addDefine('_XOPEN_SOURCE=600');
 }
 else if (platform === Platform.Pi) {
 	g4 = true;
@@ -371,6 +375,8 @@ else if (platform === Platform.Pi) {
 	project.addDefine('KORE_OPENGL');
 	project.addDefine('KORE_OPENGL_ES');
 	project.addDefine('KORE_POSIX');
+	project.addDefine('_POSIX_C_SOURCE=200112L');
+	project.addDefine('_XOPEN_SOURCE=600');
 	project.addIncludeDir('/opt/vc/include');
 	project.addIncludeDir('/opt/vc/include/interface/vcos/pthreads');
 	project.addIncludeDir('/opt/vc/include/interface/vmcs_host/linux');
