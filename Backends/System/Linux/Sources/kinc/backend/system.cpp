@@ -880,7 +880,21 @@ bool kinc_keyboard_active() {
 	return true;
 }
 
-void kinc_load_url(const char* url) {}
+void kinc_load_url(const char* url) {
+
+	#define MAX_COMMAND_BUFFER_SIZE 256
+
+	if (strstr(url, "http://") || strstr(url, "https://")) {
+
+		char openUrlCommand[MAX_COMMAND_BUFFER_SIZE];
+		snprintf(openUrlCommand, MAX_COMMAND_BUFFER_SIZE, "xdg-open %s", url);
+		system(openUrlCommand);
+
+	}
+
+	#undef MAX_COMMAND_BUFFER_SIZE
+
+}
 
 void kinc_vibrate(int ms) {}
 
@@ -975,7 +989,7 @@ int kinc_init(const char* name, int width, int height, kinc_window_options_t *wi
 }
 
 void kinc_internal_shutdown() {
-
+	Kore::closeHIDGamepads();
 }
 
 #ifndef KINC_NO_MAIN
