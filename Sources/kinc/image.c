@@ -20,9 +20,9 @@ int LZ4_decompress_safe(const char *source, char *dest, int compressedSize, int 
 #include <string.h>
 
 #define BUFFER_SIZE 4096 * 4096 * 4
-uint8_t buffer[BUFFER_SIZE];
-size_t buffer_offset = 0;
-uint8_t *last_allocated_pointer = 0;
+static uint8_t buffer[BUFFER_SIZE];
+static size_t buffer_offset = 0;
+static uint8_t *last_allocated_pointer = 0;
 
 static void *buffer_malloc(size_t size) {
 	uint8_t *current = &buffer[buffer_offset];
@@ -68,6 +68,7 @@ static void buffer_free(void *p) {}
 #define STBI_FREE(p) buffer_free(p)
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
 #include <kinc/libs/stb_image.h>
 #include <stdio.h>
 #include <string.h>
