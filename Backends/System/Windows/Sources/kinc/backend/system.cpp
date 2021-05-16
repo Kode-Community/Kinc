@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #ifdef KORE_G4ONG5
 #include <Kore/Graphics5/Graphics.h>
 #elif KORE_G4
@@ -22,6 +20,7 @@
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <kinc/threads/thread.h>
+#include <kinc/video.h>
 #include <kinc/window.h>
 
 #define DIRECTINPUT_VERSION 0x0800

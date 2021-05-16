@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "socket.h"
 
 #include <kinc/log.h>
@@ -19,13 +17,7 @@
 #include <unistd.h>
 #endif
 
-static bool initialized = false;
-
-static void destroy() {
-#if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP)
-	WSACleanup();
-#endif
-}
+static int counter = 0;
 
 #if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP) || defined(KORE_POSIX)
 // Important: Must be cleaned with freeaddrinfo(address) later if the result is 0 in order to prevent memory leaks
@@ -49,14 +41,15 @@ KINC_FUNC void kinc_socket_options_set_defaults(kinc_socket_options_t *options) 
 }
 
 void kinc_socket_init(kinc_socket_t *sock) {
-	if (initialized) return;
-
 	sock->handle = 0;
+
 #if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP)
-	WSADATA WsaData;
-	WSAStartup(MAKEWORD(2, 2), &WsaData);
+	if (counter == 0) {
+		WSADATA WsaData;
+		WSAStartup(MAKEWORD(2, 2), &WsaData);
+	}
 #endif
-	initialized = true;
+	++counter;
 }
 
 bool kinc_socket_open(kinc_socket_t *sock, kinc_socket_protocol_t protocol, int port, struct kinc_socket_options *options) {
@@ -188,8 +181,13 @@ void kinc_socket_destroy(kinc_socket_t *sock) {
 #elif defined(KORE_POSIX)
 	close(sock->handle);
 #endif
-	destroy();
-	initialized = false;
+
+	--counter;
+#if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP)
+	if (counter == 0) {
+		WSACleanup();
+	}
+#endif
 }
 
 unsigned kinc_url_to_int(const char *url, int port) {
@@ -214,8 +212,9 @@ bool kinc_socket_listen(kinc_socket_t *socket, int backlog) {
 #if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP) || defined(KORE_POSIX)
 	int res = listen(socket->handle, backlog);
 	return (res == 0);
-#endif
+#else
 	return false;
+#endif
 }
 
 bool kinc_socket_accept(kinc_socket_t *socket, kinc_socket_t *newSocket, unsigned *remoteAddress, unsigned *remotePort) {
@@ -247,11 +246,12 @@ bool kinc_socket_connect(kinc_socket_t *socket, unsigned address, int port) {
 
 	int res = connect(socket->handle, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 	return (res == 0);
-#endif
+#else
 	return false;
+#endif
 }
 
-void kinc_socket_send(kinc_socket_t *sock, unsigned address, int port, const unsigned char *data, int size) {
+int kinc_socket_send(kinc_socket_t *sock, unsigned address, int port, const unsigned char *data, int size) {
 #if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP) || defined(KORE_POSIX)
 	struct sockaddr_in addr;
 	addr.sin_family = AF_INET;
@@ -262,16 +262,19 @@ void kinc_socket_send(kinc_socket_t *sock, unsigned address, int port, const uns
 	if (sent != size) {
 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
 	}
+	return (int)sent;
+#else
+	return 0;
 #endif
 }
 
-void kinc_socket_send_url(kinc_socket_t *sock, const char *url, int port, const unsigned char *data, int size) {
+int kinc_socket_send_url(kinc_socket_t *sock, const char *url, int port, const unsigned char *data, int size) {
 #if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP) || defined(KORE_POSIX)
 	struct addrinfo *address = NULL;
 	int res = resolveAddress(url, port, &address);
 	if (res != 0) {
 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not resolve address.");
-		return;
+		return 0;
 	}
 
 	size_t sent = sendto(sock->handle, (const char *)data, size, 0, address->ai_addr, sizeof(struct sockaddr_in));
@@ -279,15 +282,21 @@ void kinc_socket_send_url(kinc_socket_t *sock, const char *url, int port, const 
 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
 	}
 	freeaddrinfo(address);
+	return (int)sent;
+#else
+	return 0;
 #endif
 }
 
-void kinc_socket_send_connected(kinc_socket_t *sock, const unsigned char *data, int size) {
+int kinc_socket_send_connected(kinc_socket_t *sock, const unsigned char *data, int size) {
 #if defined(KORE_WINDOWS) || defined(KORE_WINDOWSAPP) || defined(KORE_POSIX)
 	size_t sent = send(sock->handle, (const char *)data, size, 0);
 	if (sent != size) {
 		kinc_log(KINC_LOG_LEVEL_ERROR, "Could not send packet.");
 	}
+	return (int)sent;
+#else
+	return 0;
 #endif
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <kinc/global.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,9 +41,9 @@ KINC_FUNC bool kinc_socket_open(kinc_socket_t *socket, kinc_socket_protocol_t pr
 KINC_FUNC bool kinc_socket_listen(kinc_socket_t *socket, int backlog);
 KINC_FUNC bool kinc_socket_accept(kinc_socket_t *socket, kinc_socket_t *newSocket, unsigned *remoteAddress, unsigned *remotePort);
 KINC_FUNC bool kinc_socket_connect(kinc_socket_t *socket, unsigned address, int port);
-KINC_FUNC void kinc_socket_send(kinc_socket_t *socket, unsigned address, int port, const unsigned char *data, int size);
-KINC_FUNC void kinc_socket_send_url(kinc_socket_t *socket, const char *url, int port, const unsigned char *data, int size);
-KINC_FUNC void kinc_socket_send_connected(kinc_socket_t *socket, const unsigned char *data, int size);
+KINC_FUNC int kinc_socket_send(kinc_socket_t *socket, unsigned address, int port, const unsigned char *data, int size);
+KINC_FUNC int kinc_socket_send_url(kinc_socket_t *socket, const char *url, int port, const unsigned char *data, int size);
+KINC_FUNC int kinc_socket_send_connected(kinc_socket_t *socket, const unsigned char *data, int size);
 KINC_FUNC int kinc_socket_receive(kinc_socket_t *socket, unsigned char *data, int maxSize, unsigned *fromAddress, unsigned *fromPort);
 KINC_FUNC int kinc_socket_receive_connected(kinc_socket_t *socket, unsigned char *data, int maxSize);
 KINC_FUNC unsigned kinc_url_to_int(const char *url, int port);
