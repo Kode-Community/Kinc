@@ -58,6 +58,10 @@ KINC_FUNC int kinc_window_create(kinc_window_options_t *win, kinc_framebuffer_op
 /// </summary>
 KINC_FUNC void kinc_window_destroy(int window);
 
+KINC_FUNC void kinc_window_options_set_defaults(kinc_window_options_t *win);
+
+KINC_FUNC void kinc_framebuffer_options_set_defaults(kinc_framebuffer_options_t *frame);
+
 /// <summary>
 /// Counts all windows the program created, including the initial window created by kinc_init.
 /// </summary>

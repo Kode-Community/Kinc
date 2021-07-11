@@ -75,7 +75,7 @@ void Graphics2::ImageShaderPainter::initShaders() {
 }
 
 void Graphics2::ImageShaderPainter::initBuffers() {
-	rectVertexBuffer = new Graphics4::VertexBuffer(bufferSize * 4, structure);
+	rectVertexBuffer = new Graphics4::VertexBuffer(bufferSize * 4, structure, Graphics4::DynamicUsage);
 	rectVertices = rectVertexBuffer->lock();
 
 	indexBuffer = new Graphics4::IndexBuffer(bufferSize * 3 * 2);
@@ -751,7 +751,7 @@ void Graphics2::TextShaderPainter::drawString(const char *text, int start, int l
 	float xpos = x;
 	float ypos = y;
 	for (int i = start; i < start + length; ++i) {
-		AlignedQuad q = font->getBakedQuad(text[i] - 32, xpos, ypos);
+		AlignedQuad q = font->getBakedQuad(((unsigned char)text[i]) - 32, xpos, ypos);
 		if (q.x0 >= 0) {
 			if (bufferIndex + 1 >= bufferSize) drawBuffer();
 			setRectColors(1.0f, color);

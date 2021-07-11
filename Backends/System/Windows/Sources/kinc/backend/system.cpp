@@ -383,13 +383,13 @@ extern "C" LRESULT WINAPI KoreWindowsMessageProcedure(HWND hWnd, UINT msg, WPARA
 		}
 		break;
 	case WM_LBUTTONDOWN:
-		if (!kinc_mouse_is_locked(kinc_windows_window_index_from_hwnd(hWnd))) SetCapture(hWnd);
+		if (!kinc_mouse_is_locked()) SetCapture(hWnd);
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
 		kinc_internal_mouse_trigger_press(kinc_windows_window_index_from_hwnd(hWnd), 0, mouseX, mouseY);
 		break;
 	case WM_LBUTTONUP:
-		if (!kinc_mouse_is_locked(kinc_windows_window_index_from_hwnd(hWnd))) ReleaseCapture();
+		if (!kinc_mouse_is_locked()) ReleaseCapture();
 		mouseX = GET_X_LPARAM(lParam);
 		mouseY = GET_Y_LPARAM(lParam);
 		kinc_internal_mouse_trigger_release(kinc_windows_window_index_from_hwnd(hWnd), 0, mouseX, mouseY);
@@ -1242,7 +1242,7 @@ int kinc_init(const char *name, int width, int height, kinc_window_options_t *wi
 	kinc_set_application_name(name);
 	kinc_window_options_t defaultWin;
 	if (win == nullptr) {
-		kinc_internal_init_window_options(&defaultWin);
+		kinc_window_options_set_defaults(&defaultWin);
 		win = &defaultWin;
 	}
 	win->width = width;
